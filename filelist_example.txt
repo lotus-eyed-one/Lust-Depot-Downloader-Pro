@@ -1,0 +1,41 @@
+# Example File Filter List
+# Use with: --filelist filelist.txt
+#
+# Wildcard patterns (simple matching)
+*.dll
+*.exe
+*.so
+*.dylib
+
+# Directory patterns
+maps/*
+models/*
+sounds/*
+
+# Specific files
+game/csgo.exe
+game/engine.dll
+bin/dedicated.dll
+
+# Regex patterns (prefix with "regex:")
+# Match any .bsp file in maps directory
+regex:^maps/.*\.bsp$
+
+# Match all model files
+regex:^models/.*\.(mdl|vtx|vvd|phy)$
+
+# Match any .vpk archive
+regex:.*\.vpk$
+
+# Exclude patterns (NOT supported yet - download all then filter manually)
+# These are examples for future implementation:
+# !*.log
+# !*.txt
+# !temp/*
+
+# Tips:
+# - One pattern per line
+# - Use forward slashes (/) for paths
+# - Wildcards: * (any chars), ? (single char)
+# - Regex gives more control but is slower
+# - Case-insensitive matching

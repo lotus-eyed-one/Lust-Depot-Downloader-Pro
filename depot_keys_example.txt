@@ -1,0 +1,19 @@
+# Example Depot Keys File
+# Format: depotID;hexKey
+# 
+# To generate actual keys, use:
+#   python Scripts/generate_manifests.py <appid> --keys-only
+#
+# Example keys below are FAKE - replace with real keys
+
+# Counter-Strike: Global Offensive (AppID 730) - Example
+731;E5A1D6C2F8B3A4E9D7C1F2A8B4C6E3D9A1B2C4D5E6F7A8B9C0D1E2F3A4B5C6D7
+732;A4B9E3F7C2D8A1E6B3F9C4D7E2A8B1C6D3E5F7A9B1C3D5E7F9A1B3C5D7E9F1A3
+733;C6E2A9D3F8B1C4E7A2D9F3B8C1E6A4D7E3F9B5C7D9E1F3A5B7C9D1E3F5A7B9C1
+
+# You can add comments with #
+# Leave blank lines for readability
+
+# Get real keys from:
+# - https://bbs.steamtools.net
+# - Python script: generate_manifests.py

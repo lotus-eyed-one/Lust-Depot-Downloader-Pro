@@ -1,0 +1,78 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>LustsDepotDownloaderPro</AssemblyName>
+    <RootNamespace>LustsDepotDownloaderPro</RootNamespace>
+    <Version>1.5.0</Version>
+    <Authors>The Lust</Authors>
+    <Description>Steam depot downloader — multi-threaded, resumable, community manifest support</Description>
+
+    <!--
+      PublishSingleFile and SelfContained require a RuntimeIdentifier.
+      Pass -r <rid> on the command line (build scripts do this).
+      Local 'dotnet build' without -r works for development (no single-file).
+    -->
+    <SelfContained Condition="'$(RuntimeIdentifier)' != ''">true</SelfContained>
+    <PublishSingleFile Condition="'$(RuntimeIdentifier)' != ''">true</PublishSingleFile>
+    <PublishReadyToRun Condition="'$(RuntimeIdentifier)' != ''">true</PublishReadyToRun>
+    <IncludeNativeLibrariesForSelfExtract Condition="'$(RuntimeIdentifier)' != ''">true</IncludeNativeLibrariesForSelfExtract>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SteamKit2"           Version="3.2.0" />
+    <PackageReference Include="Newtonsoft.Json"      Version="13.0.3" />
+    <PackageReference Include="SharpZipLib"          Version="1.4.2" />
+    <PackageReference Include="ValveKeyValue"        Version="0.11.0.378" />
+    <PackageReference Include="System.CommandLine"   Version="2.0.0-beta4.22272.1" />
+    <PackageReference Include="Spectre.Console"      Version="0.49.1" />
+    <PackageReference Include="QRCoder"              Version="1.6.0" />
+    <PackageReference Include="Polly"                Version="8.5.0" />
+    <PackageReference Include="protobuf-net"         Version="3.2.52" />
+  </ItemGroup>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       .env → EmbeddedConfig.Generated.cs
+       Runs BEFORE every compile so keys are always fresh in the binary.
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <Target Name="GenerateEmbeddedConfig" BeforeTargets="BeforeBuild;BeforePublish">
+
+    <Message Text="[env] Generating EmbeddedConfig from .env..." Importance="high" />
+
+    <!-- Windows: use the .ps1 script via pwsh (PowerShell 7+) or powershell -->
+    <Exec
+      Condition="'$(OS)' == 'Windows_NT' AND Exists('$(MSBuildProjectDirectory)\.env')"
+      Command="pwsh -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\GenerateEmbeddedConfig.ps1&quot; &quot;$(MSBuildProjectDirectory)&quot;"
+      ContinueOnError="true" />
+
+    <!-- Windows fallback: try legacy powershell.exe if pwsh not found -->
+    <Exec
+      Condition="'$(OS)' == 'Windows_NT' AND Exists('$(MSBuildProjectDirectory)\.env') AND '$(PROCESSOR_ARCHITECTURE)' != ''"
+      Command="if not exist &quot;$(MSBuildProjectDirectory)\Utils\EmbeddedConfig.Generated.cs&quot; powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\GenerateEmbeddedConfig.ps1&quot; &quot;$(MSBuildProjectDirectory)&quot;"
+      ContinueOnError="true" />
+
+    <!-- Linux / macOS: use the .sh script -->
+    <Exec
+      Condition="'$(OS)' != 'Windows_NT' AND Exists('$(MSBuildProjectDirectory)/.env')"
+      Command="bash &quot;$(MSBuildProjectDirectory)/GenerateEmbeddedConfig.sh&quot; &quot;$(MSBuildProjectDirectory)&quot;"
+      ContinueOnError="true" />
+
+    <!-- If no .env exists at all, generate with empty values so it compiles -->
+    <Exec
+      Condition="!Exists('$(MSBuildProjectDirectory)\.env') AND !Exists('$(MSBuildProjectDirectory)/.env') AND '$(OS)' == 'Windows_NT'"
+      Command="pwsh -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\GenerateEmbeddedConfig.ps1&quot; &quot;$(MSBuildProjectDirectory)&quot;"
+      ContinueOnError="true" />
+    <Exec
+      Condition="!Exists('$(MSBuildProjectDirectory)\.env') AND !Exists('$(MSBuildProjectDirectory)/.env') AND '$(OS)' != 'Windows_NT'"
+      Command="bash &quot;$(MSBuildProjectDirectory)/GenerateEmbeddedConfig.sh&quot; &quot;$(MSBuildProjectDirectory)&quot;"
+      ContinueOnError="true" />
+
+    <Message Text="[env] EmbeddedConfig generation complete." Importance="high" />
+  </Target>
+
+</Project>
